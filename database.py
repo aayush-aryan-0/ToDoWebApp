@@ -44,7 +44,7 @@ class ToDoDB:
                 raise TaskNotFound(f"{task} NOT Found")
             
     @staticmethod
-    def readToDoList():
+    def readToDoDB():
         connect=ToDoDB.__connect()
         read=connect.execute("SELECT * FROM todo").fetchall()
         tasks=[]
