@@ -10,3 +10,6 @@ class Task:
     @property
     def done(self):
         return self.__done
+    @done.setter
+    def done(self,done):
+        self.__done=done
