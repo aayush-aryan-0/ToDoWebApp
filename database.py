@@ -1,32 +1,44 @@
 import sqlite3
 from errors import TaskAlreadyExists,TaskNotFound
 from task import Task
+import os
+
+
 
 
 class ToDoDB:
     
     @staticmethod
     def __connect():
-        connect=sqlite3.connect("todo_data.db")
-        connect.execute('''CREATE TABLE IF NOT EXISTS todo
-                            (task TEXT PRIMARY KEY,
-                            done INTEGER NOT NULL DEFAULT 0)''')
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+        DB_PATH = os.path.join(BASE_DIR, "resources", "todo.db")
+
+        connect = sqlite3.connect(DB_PATH)
+
+        connect.execute('''
+            CREATE TABLE IF NOT EXISTS todo
+            (task TEXT PRIMARY KEY,
+             done INTEGER NOT NULL DEFAULT 0)
+        ''')
+
         return connect
 
     @staticmethod
-    def addTask(task):
+    def addTask(task,done):
         connect=ToDoDB.__connect()
-        read=connect.execute("SELECT * FROM todo WHERE task=?").fetchall()
+        read=connect.execute("SELECT * FROM todo WHERE task=?",(task,)).fetchall()
         if not read:
-           connect.execute("INSERT INTO todo(task) VALUES(?)",(task,))
+           connect.execute("INSERT INTO todo(task) VALUES(?,?)",(task,done))
            connect.commit()
         else:
             raise TaskAlreadyExists(f"{task} Already Exists")
+    
           
     @staticmethod
     def deleteTask(task):
             connect=ToDoDB.__connect()
-            read=connect.execute("SELECT * FROM todo WHERE task=?").fetchone()
+            read=connect.execute("SELECT * FROM todo WHERE task=?",(task,)).fetchone()
             if read:
                connect.execute("DELETE FROM todo WHERE task = ?",(task,))
                connect.commit()
@@ -36,7 +48,7 @@ class ToDoDB:
     @staticmethod
     def toggleDone(task):
             connect=ToDoDB.__connect()
-            read=connect.execute("SELECT * FROM todo WHERE task=?").fetchone()
+            read=connect.execute("SELECT * FROM todo WHERE task=?",(task,)).fetchone()
             if read:
                connect.execute("UPDATE todo SET done = 1-done WHERE task = ?",(task,))
                connect.commit()

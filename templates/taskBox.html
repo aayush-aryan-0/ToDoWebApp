@@ -1,0 +1,28 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Home</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styleTask.css') }}">
+</head>
+<body id="taskbody">
+  <section id="section" class="gjs-section">
+    <div id="taskContainer" class="gjs-container">
+         <form action="/save" method="POST">
+          <input type="checkbox" id="checkBox" name="done" value="True"{% if task.done %} checked {% endif %}/>
+          <textarea placeholder="Enter task" name="text">{{ task.text }}</textarea>
+            <button type="submit" id="saveBt" name="saveBt" value="save">SAVE</button>
+        </form>
+       
+        <form action="/delete" method="POST">
+            <input type="hidden" name="text" value="{{ task.text }}">
+            <button type="button" id="deleteBt" name="deleteBt" value="delete">DELETE</button>
+        </form>
+       
+      
+    </div>
+
+   
+  </section>
+</body>
+</html>

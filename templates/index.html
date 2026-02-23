@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/icon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="head">
+            <div class="icon">To-do List</div>
+            <div class="info">
+            <ul>
+                <li><a href="https://github.com/aayush-aryan-0/ToDoWebApp/">GitHub</a></li>
+            </ul>
+            </div>
+            </div>
+        </nav>
+
+    </header>
+    <main>
+        <form action="/add" method="POST">
+        
+            <button type="submit">Add</button>
+        
+        </form>
+        {% for task in tasks %}
+
+            {% include "taskbox.html" %}
+
+        {% endfor %}
+
+        <div id="message"></div>
+    </main>
+    <footer>
+        idk
+    </footer>
+    
+</body>
+</html>
