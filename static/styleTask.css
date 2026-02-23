@@ -1,0 +1,81 @@
+html {
+  scroll-behavior: smooth;
+}
+
+.gjs-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 90%;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+.gjs-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#checkBox {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+}
+
+#textBox {
+  flex: 1;
+  background-color: #13181f;
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+  height: 50px;
+  resize: none;
+}
+
+#saveBt {
+  min-width: 50px;
+  min-height: 50px;
+  padding: 10px;
+  margin: 0px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 700;
+  color: #30a602;
+  text-align: center;
+  background-color: #13181f;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+#deleteBt {
+  min-width: 50px;
+  min-height: 50px;
+  padding: 10px;
+  margin: 0px;
+  font-weight: 700;
+  color: #ff5436;
+  text-align: center;
+  background-color: #13181f;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+#section {
+  background-color: #313538;
+  padding: 15px 0 15px 0;
+  min-height: 10vh;
+}
+
+#taskContainer {
+  background-color: #313538;
+  display: flex;
+  align-items: center;
+}
+
+#textBox::placeholder {
+  color: #c3cdd4;
+}
