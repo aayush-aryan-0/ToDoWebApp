@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 from task import Task
 from database import *
-
+from datetime import datetime
 app=Flask(__name__)
 
 
@@ -11,9 +11,9 @@ def home(mssg=None):
     taskList=ToDoDB.readToDoDB()
     tasks=[[]]
     for task in taskList:
-        tasks.append([task.id,task.text,task.done])
-    
-    return render_template('index.html',tasks=taskList,message=mssg,TaskMessage=tasks)
+        tasks.append([task.id,task.text,task.datetime,task.done])
+    now_str = datetime.now().strftime("%Y-%m-%dT%H:%M")
+    return render_template('index.html',mindatetime=now_str,tasks=taskList,message=mssg,TaskMessage=tasks)
 
 @app.route("/add",methods=['POST'])
 def add():
@@ -29,13 +29,15 @@ def save():
     id=request.form.get("id")
     text = request.form.get("text")
     check = request.form.get("done")
+    datetime=request.form.get("datetime")
+
     done=0
     if(check):
         done=1
     else:
         done=0  
     try:
-        ToDoDB.updateTask(Task(text=text, id=id, done=done))
+        ToDoDB.updateTask(Task(text=text, id=id, done=done,datetime=datetime))
     
     except Exception as e:
         return redirect(f'/{e} also {text} also {done}')

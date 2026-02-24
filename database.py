@@ -23,6 +23,7 @@ class ToDoDB:
             CREATE TABLE IF NOT EXISTS todo (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 task TEXT,
+                datetime TEXT DEFAULT (datetime('now', 'localtime')),
                 done INTEGER NOT NULL DEFAULT 0
             )
         ''')
@@ -59,8 +60,8 @@ class ToDoDB:
     def updateTask(task: Task):
         with ToDoDB.__connect() as conn:
             cursor = conn.execute(
-                "UPDATE todo SET task = ?, done = ? WHERE id = ?",
-                (task.text, task.done, task.id)
+                "UPDATE todo SET task = ?, datetime=? , done = ? WHERE id = ?",
+                (task.text,task.datetime, task.done, task.id)
             )
             if cursor.rowcount == 0:
                 raise TaskNotFound(f"Task {task.id} - {task.text} not found.")
@@ -69,7 +70,7 @@ class ToDoDB:
     def readToDoDB():
         tasks = []
         with ToDoDB.__connect() as conn:
-            cursor = conn.execute("SELECT id, task, done FROM todo")
+            cursor = conn.execute("SELECT * FROM todo")
             for row in cursor.fetchall():
-                tasks.append(Task(row['task'], row['id'], bool(row['done'])))
+                tasks.append(Task(id=row['id'],text=row['task'], datetime=row['datetime'] ,done=bool(row['done'])))
         return tasks
