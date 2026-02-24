@@ -1,13 +1,17 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, session,request
+from login import login_bp  
+from database import ToDoDB
 from task import Task
-from database import *
 from datetime import datetime
 app=Flask(__name__)
-
+app.secret_key = "supersecret"  
+app.register_blueprint(login_bp)
 
 @app.route('/')
 @app.route('/<mssg>')
 def home(mssg=None):
+    if not session.get('loggedin'):
+        return redirect(url_for('login.login'))
     taskList=ToDoDB.readToDoDB()
     tasks=[[]]
     for task in taskList:

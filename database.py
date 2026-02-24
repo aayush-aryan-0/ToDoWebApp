@@ -1,6 +1,6 @@
 import sqlite3
 import os
-from errors import TaskAlreadyExists, TaskNotFound
+from errors import *
 from task import Task
 
 class ToDoDB:
@@ -74,3 +74,72 @@ class ToDoDB:
             for row in cursor.fetchall():
                 tasks.append(Task(id=row['id'],text=row['task'], datetime=row['datetime'] ,done=bool(row['done'])))
         return tasks
+    
+
+class Users:
+     
+    @staticmethod
+    def __connect():
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+       
+        resources_dir = os.path.join(BASE_DIR, "resources")
+        if not os.path.exists(resources_dir):
+            os.makedirs(resources_dir)
+            
+        DB_PATH = os.path.join(resources_dir, "users.db")
+        
+        connect = sqlite3.connect(DB_PATH)
+      
+        connect.row_factory = sqlite3.Row 
+        
+        connect.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                username TEXT PRIMARY KEY,
+                password TEXT NOT NULL,
+                email TEXT NOT NULL
+            )
+        ''')
+        return connect
+
+    @staticmethod
+    def addUser(username:str,password:str,email:str):
+        try:
+            with Users.__connect() as conn:
+                cursor = conn.execute(
+                    "INSERT INTO users(username, password,email) VALUES(?, ?,?)", 
+                    ((username),password,email)
+                )
+        except sqlite3.IntegrityError as e:
+            raise UserAlreadyExists
+
+
+    @staticmethod
+    def deleteUser(username:str):
+        with Users.__connect() as conn:
+            cursor = conn.execute("DELETE FROM users WHERE username = ?", (username,))
+            if cursor.rowcount == 0:
+                raise TaskNotFound(f"Task {username} not found.")
+
+    @staticmethod
+    def changePassword(username:str,password:str):
+        with Users.__connect() as conn:
+            cursor = conn.execute("UPDATE users SET password = ? WHERE username = ?", (password,username))
+            if cursor.rowcount == 0:
+                raise TaskNotFound(f"Task ID {username} not found.")
+
+    @staticmethod
+    def changeEmail(username:str,email:str):
+        with Users.__connect() as conn:
+            cursor = conn.execute("UPDATE users SET email = ? WHERE username = ?", (email,username))
+            if cursor.rowcount == 0:
+                raise TaskNotFound(f"Task ID {username} not found.")
+    
+    @staticmethod
+    def account(username:str,password:str):
+        with Users.__connect() as conn:
+            return conn.execute("SELECT * FROM users WHERE username=? AND password=?",(username,password)).fetchone()
+
+            
+      
+
+    
