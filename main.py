@@ -6,39 +6,52 @@ app=Flask(__name__)
 
 
 @app.route('/')
-def home():
-    return render_template('index.html',tasks=ToDoDB.readToDoDB())
+@app.route('/<mssg>')
+def home(mssg=None):
+    taskList=ToDoDB.readToDoDB()
+    tasks=[[]]
+    for task in taskList:
+        tasks.append([task.id,task.text,task.done])
+    
+    return render_template('index.html',tasks=taskList,message=mssg,TaskMessage=tasks)
 
 @app.route("/add",methods=['POST'])
 def add():
     try:
-        ToDoDB.addTask("",0)
+        ToDoDB.addTask(Task(""))
     except Exception as e:
-        print(e)
-    return redirect('/')
+        return redirect(f'/{e}')
+    else:
+        return redirect('/')
 
 @app.route("/save",methods=['POST'])
 def save():
+    id=request.form.get("id")
+    text = request.form.get("text")
+    check = request.form.get("done")
+    done=0
+    if(check):
+        done=1
+    else:
+        done=0  
     try:
-        text=text = request.form.get("text")
-        done=text = request.form.get("done")
-
-        if(done):
-            ToDoDB.addTask(text,1)
-        else:
-            ToDoDB.addTask(text,0)
+        ToDoDB.updateTask(Task(text=text, id=id, done=done))
+    
     except Exception as e:
-        print(e)
-    return redirect('/') 
+        return redirect(f'/{e} also {text} also {done}')
+    else:
+        return redirect(f'/also {text} also {done}') 
     
 @app.route("/delete",methods=['POST'])
 def delete():
     try:
-        text=text = request.form.get("text")
-        ToDoDB.deleteTask(text)
+        id=request.form.get("id")
+        ToDoDB.deleteTask(Task(id=id))
+    
     except Exception as e:
-        print(e)
-    return redirect('/') 
+        return redirect(f'/{e}')
+    else:
+        return redirect('/') 
 
 
 

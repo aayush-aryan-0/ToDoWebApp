@@ -1,9 +1,11 @@
 class Task:
-    __text=""
-    __done=False
-    def __init__(self,text,done):
+    def __init__(self,text:str=None,id:int=None,done:bool=False):
+        self.__id=id
         self.__text=text
         self.__done=done
+    @property
+    def id(self):
+        return self.__id
     @property
     def text(self):
         return self.__text
@@ -13,7 +15,10 @@ class Task:
     @done.setter
     def done(self,done):
         self.__done=done
-    @done.setter
+    @text.setter
     def text(self,text):
         self.__text=text
+    @id.setter
+    def id(self,id):
+        self.__id=id
     
