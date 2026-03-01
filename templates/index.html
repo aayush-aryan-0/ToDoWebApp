@@ -14,31 +14,36 @@
             <div class="icon">To-do List</div>
             <div class="info">
             <ul>
-                <li><a href="https://github.com/aayush-aryan-0/ToDoWebApp/">GitHub</a></li>
+                <li><a class="aboutElements" href="https://github.com/aayush-aryan-0/ToDoWebApp/">GitHub</a></li>
+                <li><a class="aboutElements" href="{{ url_for('login.logout') }}">Logout</a></li>
             </ul>
             </div>
             </div>
+           
         </nav>
 
     </header>
     <main>
-        <form action="/add" method="POST">
+         <div id="messageDiv" class="message" name="messageDiv"><p>{{message}}</p></div>
         
-            <button type="submit">Add</button>
-        
-        </form>
         {% for task in tasks %}
 
             {% include "taskbox.html" %}
 
         {% endfor %}
+        <form class="mainBox" action="/add" method="POST">
         
-        <div id="messageDiv" class="message" name="messageDiv"><p>{{message}}</p></div>
-        <div id="TaskDiv" name="TaskDiv"><p>{{TaskMessage}}</p></div>
+            <button id="addBt" type="submit">Add</button>
+        
+        </form>
+        
+       
+       
        
     </main>
     <footer>
-        idk
+        made by: Aayush Aryan<br>
+        Contact Me:<a href="mailto:aayushar1601@gmail.com">aayushar1601@gmail.com</a>
     </footer>
     
 </body>

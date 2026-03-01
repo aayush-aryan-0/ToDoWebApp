@@ -1,10 +1,10 @@
 from datetime import datetime
 class Task:
-    def __init__(self,id:int=None,text:str="",datetime:str=datetime.now(),done:bool=False):
+    def __init__(self,id:int=None,text:str="",datetime:datetime=datetime.now(),done:bool=False,reminded:bool=False):
         self.__id=id
         self.__text=text
         self.__datetime=datetime
-      
+        self.__reminded=reminded
         self.__done=done
     @property
     def id(self):
@@ -18,6 +18,9 @@ class Task:
     @property
     def datetime(self):
         return self.__datetime
+    @property
+    def reminded(self):
+        return self.__reminded
    
     @done.setter
     def done(self,done):
@@ -31,5 +34,8 @@ class Task:
     @datetime.setter
     def datetime(self,datetime):
         self.__datetime=datetime
+    @reminded.setter
+    def reminded(self,reminded):
+        self.__reminded=reminded
  
     

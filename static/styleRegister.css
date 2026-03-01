@@ -1,0 +1,31 @@
+.textbox{
+    background-color: black;
+    color: white;
+}
+body{
+     display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: black;
+    color: aliceblue;
+}
+
+.container{
+    border-color: rgb(45, 44, 44);
+    border-width: 200px;
+    border-radius: 30px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(45, 44, 44);
+    color: aliceblue;
+}
+.btn{
+    background-color: black;
+    color: aliceblue;
+}
+a{
+    color: coral;
+}
+a:visited{
+    color: coral;
+}

@@ -1,17 +1,27 @@
 html {
   scroll-behavior: smooth;
 }
-
-.gjs-container {
+body{
+    display: flex;
+    flex-direction: column;
+     align-items: center; 
+}
+div {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   width: 90%;
   margin: 0 auto;
   max-width: 1200px;
+  background-color: #000000;
 }
-
-.gjs-section {
+form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+section {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -24,8 +34,9 @@ html {
 }
 
 #textBox {
-  flex: 1;
-  background-color: #13181f;
+  flex: 3;
+  min-width: 200px;
+  background-color: #080909;
   color: white;
   padding: 10px;
   border-radius: 6px;
@@ -34,7 +45,9 @@ html {
   height: 50px;
   resize: none;
 }
-
+textarea {
+    resize: none;
+}
 #saveBt {
   min-width: 50px;
   min-height: 50px;
@@ -64,18 +77,18 @@ html {
   cursor: pointer;
 }
 
-#section {
-  background-color: #313538;
-  padding: 15px 0 15px 0;
-  min-height: 10vh;
-}
-
-#taskContainer {
-  background-color: #313538;
-  display: flex;
-  align-items: center;
-}
 
 #textBox::placeholder {
   color: #c3cdd4;
+}
+
+#datetime {
+  flex: 1;            
+  max-width: 180px;    
+  background-color: #13181f;
+  color: white;
+  border: 1px solid #333;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;  
 }
