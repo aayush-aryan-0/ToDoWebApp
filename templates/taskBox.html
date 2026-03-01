@@ -6,9 +6,9 @@
   <title>Edit Task</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styleTask.css') }}">
 </head>
-<body id="taskbody">
-  <section id="section" class="gjs-section">
-    <div id="taskContainer" class="gjs-container">
+<body>
+  <section  >
+    <div  >
         
         <form action="/save" method="POST">
           <input type="hidden" name="id" value="{{ task.id }}">

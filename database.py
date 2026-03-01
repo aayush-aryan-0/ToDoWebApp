@@ -2,7 +2,8 @@ import sqlite3
 import os
 from errors import *
 from task import Task
-
+from datetime import datetime
+from argon2 import PasswordHasher
 class ToDoDB:
     
     @staticmethod
@@ -24,7 +25,8 @@ class ToDoDB:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 task TEXT,
                 datetime TEXT DEFAULT (datetime('now', 'localtime')),
-                done INTEGER NOT NULL DEFAULT 0
+                done INTEGER NOT NULL DEFAULT 0,
+                reminded INTEGER NOT NULL DEFAULT 0
             )
         ''')
         return connect
@@ -67,12 +69,23 @@ class ToDoDB:
                 raise TaskNotFound(f"Task {task.id} - {task.text} not found.")
 
     @staticmethod
+    def toggleReminded(task: Task):
+        with ToDoDB.__connect() as conn:
+            cursor = conn.execute(
+                "UPDATE todo SET reminded = 1-? WHERE id = ?",
+                (task.reminded, task.id)
+            )
+            if cursor.rowcount == 0:
+                raise TaskNotFound(f"Task {task.id} - {task.text} not found.")
+    
+
+    @staticmethod
     def readToDoDB():
         tasks = []
         with ToDoDB.__connect() as conn:
             cursor = conn.execute("SELECT * FROM todo")
             for row in cursor.fetchall():
-                tasks.append(Task(id=row['id'],text=row['task'], datetime=row['datetime'] ,done=bool(row['done'])))
+                tasks.append(Task(id=row['id'],text=row['task'], datetime=datetime.fromisoformat(row['datetime'])  ,done=bool(row['done']),reminded=bool(row['reminded'])))
         return tasks
     
 
@@ -104,6 +117,8 @@ class Users:
     @staticmethod
     def addUser(username:str,password:str,email:str):
         try:
+            ph=PasswordHasher()
+            password=ph.hash(password)
             with Users.__connect() as conn:
                 cursor = conn.execute(
                     "INSERT INTO users(username, password,email) VALUES(?, ?,?)", 
@@ -137,7 +152,12 @@ class Users:
     @staticmethod
     def account(username:str,password:str):
         with Users.__connect() as conn:
-            return conn.execute("SELECT * FROM users WHERE username=? AND password=?",(username,password)).fetchone()
+            ph=PasswordHasher()
+            cursor=conn.execute("SELECT password FROM users WHERE username=?",(username,)).fetchone()
+            if not cursor:
+                raise UserNotFound("User Not Found")
+            ph.verify(cursor[0],password)
+        
 
             
       

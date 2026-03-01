@@ -3,28 +3,31 @@ from login import login_bp
 from database import ToDoDB
 from task import Task
 from datetime import datetime
+from threading import Thread
+from reminder import reminder
 app=Flask(__name__)
 app.secret_key = "supersecret"  
 app.register_blueprint(login_bp)
-
+mssg=""
+Thread(target=reminder,daemon=True).start()
 @app.route('/')
-@app.route('/<mssg>')
-def home(mssg=None):
+def home():
     if not session.get('loggedin'):
         return redirect(url_for('login.login'))
     taskList=ToDoDB.readToDoDB()
     tasks=[[]]
     for task in taskList:
         tasks.append([task.id,task.text,task.datetime,task.done])
-    now_str = datetime.now().strftime("%Y-%m-%dT%H:%M")
-    return render_template('index.html',mindatetime=now_str,tasks=taskList,message=mssg,TaskMessage=tasks)
+    now_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+    return render_template('index.html',mindatetime=now_str,tasks=taskList,message=mssg)
 
 @app.route("/add",methods=['POST'])
 def add():
     try:
         ToDoDB.addTask(Task(""))
     except Exception as e:
-        return redirect(f'/{e}')
+        mssg=e
+        return redirect('/') 
     else:
         return redirect('/')
 
@@ -44,9 +47,10 @@ def save():
         ToDoDB.updateTask(Task(text=text, id=id, done=done,datetime=datetime))
     
     except Exception as e:
-        return redirect(f'/{e} also {text} also {done}')
+        mssg=e
+        return redirect('/') 
     else:
-        return redirect(f'/also {text} also {done}') 
+        return redirect('/') 
     
 @app.route("/delete",methods=['POST'])
 def delete():
@@ -55,7 +59,8 @@ def delete():
         ToDoDB.deleteTask(Task(id=id))
     
     except Exception as e:
-        return redirect(f'/{e}')
+        mssg=e
+        return redirect('/') 
     else:
         return redirect('/') 
 
