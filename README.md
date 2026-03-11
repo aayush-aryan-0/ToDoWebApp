@@ -16,7 +16,7 @@ Users can create, update, and delete tasks while receiving reminder notification
 
 - Simple web interface built with HTML5 and CSS
 
-###Tech Stack
+### Tech Stack
 
 - Backend: Python, Flask
 
