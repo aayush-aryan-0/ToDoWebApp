@@ -1,7 +1,7 @@
 
 __pycache__/
 *.pyc
-
+*.db
 test/
 *.env
 .env
