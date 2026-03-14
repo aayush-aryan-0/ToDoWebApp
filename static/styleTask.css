@@ -82,7 +82,7 @@ textarea {
   color: #c3cdd4;
 }
 
-#datetime {
+#reminderDatetime {
   flex: 1;            
   max-width: 180px;    
   background-color: #13181f;

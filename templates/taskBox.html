@@ -16,7 +16,7 @@
           <input type="checkbox" id="checkBox" name="done" value="True" {% if task.done %} checked {% endif %}/>
           
           <textarea placeholder="Enter task" name="text">{{ task.text }}</textarea>
-          <input type="datetime-local" id="datetime" name="datetime" value="{{ task.datetime }}"  min="{{ mindatetime }}" step="1" >
+          <input type="datetime-local" id="reminderDatetime" name="reminderDatetime" value="{{ task.reminderDatetime }}"  min="{{ mindatetime }}" step="1" >
           <button type="submit" id="saveBt">SAVE</button>
         </form>
         

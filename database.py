@@ -24,7 +24,7 @@ class ToDoDB:
             CREATE TABLE IF NOT EXISTS todo (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 task TEXT,
-                datetime TEXT DEFAULT (datetime('now', 'localtime')),
+                reminderDatetime TEXT DEFAULT (datetime('now', 'localtime')),
                 done INTEGER NOT NULL DEFAULT 0,
                 reminded INTEGER NOT NULL DEFAULT 0
             )
@@ -38,8 +38,8 @@ class ToDoDB:
         
         with ToDoDB.__connect() as conn:
             cursor = conn.execute(
-                "INSERT INTO todo(task, done) VALUES(?, ?)", 
-                ((task.text), task.done)
+                "INSERT INTO todo(task,reminderDatetime,done,reminded) VALUES(?, ?,?,?)", 
+                (task.text,task.reminderDatetime,task.done,task.reminded)
             )
            
             task.id = cursor.lastrowid
@@ -63,20 +63,20 @@ class ToDoDB:
         with ToDoDB.__connect() as conn:
             cursor = conn.execute(
                 "UPDATE todo SET task = ?, datetime=? , done = ? WHERE id = ?",
-                (task.text,task.datetime, task.done, task.id)
+                (task.text,task.reminderDatetime, task.done, task.id)
             )
             if cursor.rowcount == 0:
-                raise TaskNotFound(f"Task {task.id} - {task.text} not found.")
+                raise TaskNotFound(f"Task {task.text} not found.")
 
     @staticmethod
     def toggleReminded(task: Task):
         with ToDoDB.__connect() as conn:
             cursor = conn.execute(
-                "UPDATE todo SET reminded = 1-? WHERE id = ?",
-                (task.reminded, task.id)
+                "UPDATE todo SET reminded = 1-reminded WHERE id = ?",
+                (task.id,)
             )
             if cursor.rowcount == 0:
-                raise TaskNotFound(f"Task {task.id} - {task.text} not found.")
+                raise TaskNotFound(f"Task {task.text} not found.")
     
 
     @staticmethod
@@ -85,7 +85,7 @@ class ToDoDB:
         with ToDoDB.__connect() as conn:
             cursor = conn.execute("SELECT * FROM todo")
             for row in cursor.fetchall():
-                tasks.append(Task(id=row['id'],text=row['task'], datetime=datetime.fromisoformat(row['datetime'])  ,done=bool(row['done']),reminded=bool(row['reminded'])))
+                tasks.append(Task(id=row['id'],text=row['task'], reminderDatetime=datetime.fromisoformat(row['reminderDatetime'])  ,done=bool(row['done']),reminded=bool(row['reminded'])))
         return tasks
     
 
@@ -159,7 +159,7 @@ class Users:
             if not cursor:
                 raise UserNotFound("User Not Found")
             ph.verify(cursor[0],password)
-            return cursor
+            #return cursor
         
 
             
