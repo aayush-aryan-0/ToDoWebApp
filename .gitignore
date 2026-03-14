@@ -8,4 +8,4 @@ test/
 todo_env/
 *.txt
 resources/
-
+.gitignore
