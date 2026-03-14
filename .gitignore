@@ -7,4 +7,5 @@ test/
 .env
 todo_env/
 *.txt
-data.db
+resources/
+
