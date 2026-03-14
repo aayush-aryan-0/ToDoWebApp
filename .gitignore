@@ -4,6 +4,7 @@ __pycache__/
 
 test/
 *.env
+.env
 todo_env/
-
+*.txt
 data.db
