@@ -1,10 +1,13 @@
 from typing import Final
 from urllib.parse import quote, urlencode,quote_plus
 import requests
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 
-
-TOKEN: Final = "***REMOVED***"
+TOKEN: Final = os.getenv("TELEGRAM_TOKEN")
 BOT_USERNAME: Final = "@togetitdone_bot"
 CHAT_ID:Final="-1003621093424"
 

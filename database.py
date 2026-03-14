@@ -122,7 +122,7 @@ class Users:
             with Users.__connect() as conn:
                 cursor = conn.execute(
                     "INSERT INTO users(username, password,email) VALUES(?, ?,?)", 
-                    ((username),password,email)
+                    (username,password,email)
                 )
         except sqlite3.IntegrityError as e:
             raise UserAlreadyExists
@@ -137,6 +137,8 @@ class Users:
 
     @staticmethod
     def changePassword(username:str,password:str):
+        ph=PasswordHasher()
+        password=ph.hash(password)
         with Users.__connect() as conn:
             cursor = conn.execute("UPDATE users SET password = ? WHERE username = ?", (password,username))
             if cursor.rowcount == 0:
@@ -147,7 +149,7 @@ class Users:
         with Users.__connect() as conn:
             cursor = conn.execute("UPDATE users SET email = ? WHERE username = ?", (email,username))
             if cursor.rowcount == 0:
-                raise TaskNotFound(f"Task ID {username} not found.")
+                raise UserNotFound(f"{username} not found.")
     
     @staticmethod
     def account(username:str,password:str):
@@ -157,6 +159,7 @@ class Users:
             if not cursor:
                 raise UserNotFound("User Not Found")
             ph.verify(cursor[0],password)
+            return cursor
         
 
             

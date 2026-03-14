@@ -5,38 +5,41 @@ from task import Task
 from datetime import datetime
 from threading import Thread
 from reminder import reminder
-app=Flask(__name__)
-app.secret_key = "supersecret"  
+from dotenv import load_dotenv
+import os
+load_dotenv()
+
+app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY")
+
 app.register_blueprint(login_bp)
-mssg=""
-Thread(target=reminder,daemon=True).start()
+errorMessgage=""
+
 @app.route('/')
 def home():
     if not session.get('loggedin'):
         return redirect(url_for('login.login'))
     taskList=ToDoDB.readToDoDB()
-    tasks=[[]]
-    for task in taskList:
-        tasks.append([task.id,task.text,task.datetime,task.done])
     now_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-    return render_template('index.html',mindatetime=now_str,tasks=taskList,message=mssg)
+    return render_template('index.html',mindatetime=now_str,tasks=taskList,message=errorMessgage)
 
 @app.route("/add",methods=['POST'])
 def add():
     try:
         ToDoDB.addTask(Task(""))
     except Exception as e:
-        mssg=e
-        return redirect('/') 
+        global errorMessgage
+        errorMessgage=str(e)
+        return redirect(url_for('home')) 
     else:
-        return redirect('/')
+        return redirect(url_for('home')) 
 
 @app.route("/save",methods=['POST'])
 def save():
     id=request.form.get("id")
     text = request.form.get("text")
     check = request.form.get("done")
-    datetime=request.form.get("datetime")
+    taskDatetime=request.form.get("datetime")
 
     done=0
     if(check):
@@ -44,13 +47,14 @@ def save():
     else:
         done=0  
     try:
-        ToDoDB.updateTask(Task(text=text, id=id, done=done,datetime=datetime))
+        ToDoDB.updateTask(Task(text=text, id=id, done=done,datetime=taskDatetime))
     
     except Exception as e:
-        mssg=e
-        return redirect('/') 
+        global errorMessgage
+        errorMessgage=str(e)
+        return redirect(url_for('home'))  
     else:
-        return redirect('/') 
+        return redirect(url_for('home'))  
     
 @app.route("/delete",methods=['POST'])
 def delete():
@@ -59,12 +63,14 @@ def delete():
         ToDoDB.deleteTask(Task(id=id))
     
     except Exception as e:
-        mssg=e
-        return redirect('/') 
+        global errorMessgage
+        errorMessgage=str(e)
+        return redirect(url_for('home')) 
     else:
-        return redirect('/') 
+        return redirect(url_for('home')) 
 
 
 
 if __name__ == "__main__":
     app.run(port=50001,debug=True)
+    Thread(target=reminder,daemon=True).start()

@@ -3,7 +3,7 @@ __pycache__/
 *.pyc
 
 test/
-
+*.env
 todo_env/
 
 data.db
