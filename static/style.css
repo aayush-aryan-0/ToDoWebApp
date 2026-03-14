@@ -74,3 +74,6 @@ footer {
     background-color: #1e1d1d;
     color: white;
 }
+.errors{
+    color: red;
+}

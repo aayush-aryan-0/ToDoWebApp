@@ -24,4 +24,3 @@ def sendBot(message):
        
     except Exception as e:
         print(e)
-sendBot("fuck off")

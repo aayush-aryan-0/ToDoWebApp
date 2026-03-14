@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, session,request
+from flask import Flask, flash, render_template, redirect, url_for, session,request
 from login import login_bp  
 from database import ToDoDB
 from task import Task
@@ -11,9 +11,9 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
-
+print(f"DEBUG: Secret Key is {os.getenv('SECRET_KEY')}")
 app.register_blueprint(login_bp)
-errorMessgage=""
+
 
 @app.route('/')
 def home():
@@ -21,15 +21,14 @@ def home():
         return redirect(url_for('login.login'))
     taskList=ToDoDB.readToDoDB()
     now_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-    return render_template('index.html',mindatetime=now_str,tasks=taskList,message=errorMessgage)
+    return render_template('index.html',mindatetime=now_str,tasks=taskList)
 
 @app.route("/add",methods=['POST'])
 def add():
     try:
         ToDoDB.addTask(Task(""))
     except Exception as e:
-        global errorMessgage
-        errorMessgage=str(e)
+        flash(str(e))
         return redirect(url_for('home')) 
     else:
         return redirect(url_for('home')) 
@@ -40,18 +39,13 @@ def save():
     text = request.form.get("text")
     check = request.form.get("done")
     taskDatetime=request.form.get("datetime")
+    done= 1 if check else 0 
 
-    done=0
-    if(check):
-        done=1
-    else:
-        done=0  
     try:
         ToDoDB.updateTask(Task(text=text, id=id, done=done,datetime=taskDatetime))
     
     except Exception as e:
-        global errorMessgage
-        errorMessgage=str(e)
+        flash(str(e))
         return redirect(url_for('home'))  
     else:
         return redirect(url_for('home'))  
@@ -63,8 +57,7 @@ def delete():
         ToDoDB.deleteTask(Task(id=id))
     
     except Exception as e:
-        global errorMessgage
-        errorMessgage=str(e)
+        flash(str(e))
         return redirect(url_for('home')) 
     else:
         return redirect(url_for('home')) 
@@ -72,5 +65,5 @@ def delete():
 
 
 if __name__ == "__main__":
-    app.run(port=50001,debug=True)
     Thread(target=reminder,daemon=True).start()
+    app.run(port=50001,debug=True)
