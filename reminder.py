@@ -6,7 +6,7 @@ from datetime import datetime
 def reminder():
     while True:
         curr_time=datetime.now()
-       
+        
         todoList:Task=ToDoDB.readToDoDB()
         for task in todoList:
             if (curr_time<=task.reminderDatetime) and (not task.done) and (not task.reminded):

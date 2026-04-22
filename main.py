@@ -6,6 +6,7 @@ from datetime import datetime
 from threading import Thread
 from reminder import reminder
 from dotenv import load_dotenv
+from dateformate import isHtmlFormat,isSqliteFormat
 import os
 load_dotenv()
 
@@ -20,8 +21,8 @@ def home():
     if not session.get('loggedin'):
         return redirect(url_for('login.login'))
     taskList=ToDoDB.readToDoDB(session.get('username'))
-    now_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-    return render_template('index.html',mindatetime=now_str,tasks=taskList)
+   # now_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+    return render_template('index.html',tasks=taskList)#,mindatetime=now_str,tasks=taskList)
 
 @app.route("/add",methods=['POST'])
 def add():
@@ -35,14 +36,13 @@ def add():
 
 @app.route("/save",methods=['POST'])
 def save():
-    id=request.form.get("id")
-    text = request.form.get("text")
-    check = request.form.get("done")
-    taskDatetime=request.form.get("datetime")
-    done= 1 if check else 0 
-
     try:
-        ToDoDB.updateTask(Task(text=text, id=id, done=done,datetime=taskDatetime,username=session['username']))
+        remainderDateTime=request.form.get("datetime")
+        if remainderDateTime:
+            if not (isSqliteFormat(remainderDateTime)):
+               remainderDateTime=remainderDateTime.replace("T"," ")+":00"
+        
+        ToDoDB.updateTask(Task(id=request.form.get("id"), text=request.form.get("text").replace("T", " "),done=(1 if request.form.get("done") else 0) ,reminderDatetime=remainderDateTime,username=session.get('username')))
     
     except Exception as e:
         flash(str(e))
@@ -66,4 +66,4 @@ def delete():
 
 if __name__ == "__main__":
     Thread(target=reminder,daemon=True).start()
-    app.run(port=50001,debug=True)
+    app.run(port=80,debug=True)

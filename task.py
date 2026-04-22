@@ -1,11 +1,12 @@
 from datetime import datetime
 class Task:
-    def __init__(self,id:int=None,text:str="",reminderDatetime:datetime=datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),done:bool=False,reminded:bool=False):
+    def __init__(self,id:int=None,text:str="",reminderDatetime:datetime="",done:bool=False,reminded:bool=False,username:str=""):
         self.__id=id
         self.__text=text
         self.__reminderDatetime=reminderDatetime
         self.__reminded=reminded
         self.__done=done
+        self.__username=username
     @property
     def id(self):
         return self.__id
@@ -21,6 +22,9 @@ class Task:
     @property
     def reminded(self):
         return self.__reminded
+    @property
+    def username(self):
+        return self.__username
    
     @done.setter
     def done(self,done):
@@ -37,5 +41,8 @@ class Task:
     @reminded.setter
     def reminded(self,reminded):
         self.__reminded=reminded
+    @username.setter
+    def username(self,username):
+        self.__username=username
  
     

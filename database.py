@@ -4,6 +4,7 @@ from errors import *
 from task import Task
 from datetime import datetime
 from argon2 import PasswordHasher
+from dateformate import isHtmlFormat,isSqliteFormat
 
 class ToDoDB:
     
@@ -24,7 +25,7 @@ class ToDoDB:
         conn.execute('''
             CREATE TABLE IF NOT EXISTS todo (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                task TEXT,
+                task_text TEXT,
                 reminderDatetime TEXT DEFAULT (datetime('now', 'localtime')),
                 done INTEGER NOT NULL DEFAULT 0,
                 reminded INTEGER NOT NULL DEFAULT 0,
@@ -41,8 +42,8 @@ class ToDoDB:
         
         with ToDoDB.__connect() as conn:
             cursor = conn.execute(
-                "INSERT INTO todo(task,reminderDatetime,done,reminded,username) VALUES(?,?,?,?,?)", 
-                (task.text,task.reminderDatetime,task.done,task.reminded,task.username)
+                "INSERT INTO todo(task_text,username) VALUES(?,?)", 
+                (task.text,task.username)
             )
            
             task.id = cursor.lastrowid
@@ -64,10 +65,16 @@ class ToDoDB:
     @staticmethod
     def updateTask(task: Task)->None:
         with ToDoDB.__connect() as conn:
-            cursor = conn.execute(
-                "UPDATE todo SET task = ?, datetime=? , done = ? WHERE id = ?",
-                (task.text,task.reminderDatetime, task.done, task.id)
-            )
+            if task.reminderDatetime:
+                cursor = conn.execute(
+                    "UPDATE todo SET task_text  = ?, reminderDatetime=? , done = ? WHERE id = ?",
+                    (task.text,task.reminderDatetime, task.done, task.id)
+                )
+            else:
+                cursor = conn.execute(
+                    "UPDATE todo SET task_text  = ? , done = ? WHERE id = ?",
+                    (task.text, task.done, task.id)
+                )
             if cursor.rowcount == 0:
                 raise TaskNotFound(f"Task {task.text} not found.")
 
@@ -88,7 +95,10 @@ class ToDoDB:
         with ToDoDB.__connect() as conn:
             cursor = conn.execute("SELECT * FROM todo where username =?",(username,))
             for row in cursor.fetchall():
-                tasks.append(Task(id=row['id'],text=row['task'], reminderDatetime=datetime.fromisoformat(row['reminderDatetime'])  ,done=bool(row['done']),reminded=bool(row['reminded'])))
+                reminderDateTime=row['reminderDatetime']
+                if not (isHtmlFormat(reminderDateTime)):
+                    reminderDateTime=reminderDateTime.replace(" ","T")[:-3]
+                tasks.append(Task(id=row['id'],text=row['task_text'], reminderDatetime=reminderDateTime,done=bool(row['done']),reminded=bool(row['reminded'])))
         return tasks
     
 
