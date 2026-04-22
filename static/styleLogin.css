@@ -28,3 +28,12 @@ a:visited{
     color: coral;
     
 }
+.errors{
+    color: red;
+}
+header{
+    position: sticky;
+  top: 0;
+ 
+  z-index: 1000;
+}

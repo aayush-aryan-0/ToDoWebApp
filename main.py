@@ -19,14 +19,14 @@ app.register_blueprint(login_bp)
 def home():
     if not session.get('loggedin'):
         return redirect(url_for('login.login'))
-    taskList=ToDoDB.readToDoDB()
+    taskList=ToDoDB.readToDoDB(session.get('username'))
     now_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     return render_template('index.html',mindatetime=now_str,tasks=taskList)
 
 @app.route("/add",methods=['POST'])
 def add():
     try:
-        ToDoDB.addTask(Task(""))
+        ToDoDB.addTask(Task(text="",username=session.get('username')))
     except Exception as e:
         flash(str(e))
         return redirect(url_for('home')) 
@@ -42,7 +42,7 @@ def save():
     done= 1 if check else 0 
 
     try:
-        ToDoDB.updateTask(Task(text=text, id=id, done=done,datetime=taskDatetime))
+        ToDoDB.updateTask(Task(text=text, id=id, done=done,datetime=taskDatetime,username=session['username']))
     
     except Exception as e:
         flash(str(e))

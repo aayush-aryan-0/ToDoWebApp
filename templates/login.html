@@ -8,8 +8,19 @@
     <title>Login</title>
 </head>
 <body>
-
-    <div class="container">  
+    <header> {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul class="errors">
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+    </header>
+   
+    <main>
+        <div class="container">  
         <h2 class="word">Login</h2>
         
         <form action="{{ url_for('login.login') }}" method="post">
@@ -24,7 +35,9 @@
         </form>
 
         <p><a id="registerLink" href="{{ url_for('login.register') }}">Don't have an account? Register Here</a></p>
-    </div>
+        </div>
 
+    </main>
+    
 </body>
 </html>

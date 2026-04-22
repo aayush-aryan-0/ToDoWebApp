@@ -29,3 +29,6 @@ a{
 a:visited{
     color: coral;
 }
+.errors{
+    color: red;
+}

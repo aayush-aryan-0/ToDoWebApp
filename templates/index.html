@@ -24,7 +24,15 @@
 
     </header>
     <main>
-         <div id="messageDiv" class="message" name="messageDiv"><p>{{message}}</p></div>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul class="errors">
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
         
         {% for task in tasks %}
 
