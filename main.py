@@ -66,4 +66,5 @@ def delete():
 
 if __name__ == "__main__":
     Thread(target=reminder,daemon=True).start()
-    app.run(port=80,debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0',port=port,debug=True)
