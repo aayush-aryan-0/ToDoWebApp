@@ -1,5 +1,5 @@
 import sqlite3
-from argon2 import exceptions
+from argon2.exceptions import VerifyMismatchError
 class TaskNotFound(Exception):
     pass
 class TaskAlreadyExists(Exception):
@@ -12,5 +12,5 @@ class InvalidPassword(Exception):
     pass
 class UserNotFound(Exception):
     pass
-class PasswordMismatchError(exceptions.VerifyMismatchError):
+class PasswordMismatchError(VerifyMismatchError):
     pass
