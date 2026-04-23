@@ -3,7 +3,7 @@ from flask import Flask, flash, render_template, redirect, url_for, session,requ
 app = Flask(__name__)
 
 
-@app.route('/',method=['GET'])
+@app.route('/')
 def home():
     print("Hello Welcome.... ")
     return f"WELCOME TO WEB"
