@@ -100,6 +100,14 @@ class ToDoDB:
                     reminderDateTime=reminderDateTime.replace(" ","T")[:-3]
                 tasks.append(Task(id=row['id'],text=row['task_text'], reminderDatetime=reminderDateTime,done=bool(row['done']),reminded=bool(row['reminded'])))
         return tasks
+    @staticmethod
+    def readAllToDoDB()->list:
+        tasks = []
+        with ToDoDB.__connect() as conn:
+            cursor = conn.execute("SELECT * FROM todo ")
+            for row in cursor.fetchall():
+                tasks.append(Task(id=row['id'],text=row['task_text'], reminderDatetime=row['reminderDatetime'],done=bool(row['done']),reminded=bool(row['reminded'])))
+        return tasks
     
 
 class Users:

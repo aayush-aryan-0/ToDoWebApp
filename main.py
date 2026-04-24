@@ -3,8 +3,7 @@ from login import login_bp
 from database import ToDoDB
 from task import Task
 from datetime import datetime
-from threading import Thread
-from reminder import reminder
+import workerMain
 from dotenv import load_dotenv
 from dateformate import isHtmlFormat,isSqliteFormat
 import os
@@ -65,6 +64,6 @@ def delete():
 
 
 if __name__ == "__main__":
-    Thread(target=reminder,daemon=True).start()
+    workerMain.Thread()
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0',port=port,debug=True)
+    app.run(host="0.0.0.0",port=port,debug=True)

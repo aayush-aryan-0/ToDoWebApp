@@ -7,11 +7,12 @@ def reminder():
     while True:
         curr_time=datetime.now()
         
-        todoList:Task=ToDoDB.readToDoDB()
+        todoList:Task=ToDoDB.readAllToDoDB()
         for task in todoList:
-            if (curr_time<=task.reminderDatetime) and (not task.done) and (not task.reminded):
+            remnderDatetime=datetime.strptime(task.reminderDatetime,'%Y-%m-%d %H:%M:%S')
+            if (curr_time<=remnderDatetime) and (not task.done) and (not task.reminded):
                 reminderTimeStr=(task.reminderDatetime).strftime("%d/%m/%Y %I:%M %p")
-                print(reminderTimeStr)
+           
                 sendBot(f"{task.text} your time is up {reminderTimeStr}")
                 ToDoDB.toggleReminded(task)
         sleep(1)
