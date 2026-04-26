@@ -80,7 +80,7 @@ class ToDoDB:
         with Connection.connect()  as conn:
             cur=conn.cursor()
             cur.execute(
-                    "UPDATE todo SET task_text  = COALESCE(%s,task_text), reminderDatetime = COALESCE(%s, reminderDatetime) , done = %s WHERE id = %s RETURNING id",
+                    "UPDATE todo SET task_text  = %s, reminderDatetime = %s, done = %s WHERE id = %s RETURNING id",
                     (text,reminderDatetime,done,id))
             
             if cur.fetchone() is None:

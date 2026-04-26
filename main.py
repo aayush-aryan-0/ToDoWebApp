@@ -26,7 +26,7 @@ def home():
 @app.route("/add",methods=['POST'])
 def add():
     try:
-        ToDoDB.addTask(username=session.get('username'))
+        ToDoDB.addTask(session.get('username'))
     except Exception as e:
         flash(str(e))
         return redirect(url_for('home')) 
@@ -36,7 +36,7 @@ def add():
 @app.route("/save",methods=['POST'])
 def save():
     try:
-        ToDoDB.updateTask(id=request.form.get("id"), text=request.form.get("text"),done=bool(request.form.get("done")) ,reminderDatetime=request.form.get("reminderDatetime")  or None)
+        ToDoDB.updateTask(id=request.form.get("id"), text=request.form.get("text"),done=bool(request.form.get("done")) ,reminderDatetime=(request.form.get("reminderDatetime") or None))
     except Exception as e:
         flash(str(e))
         return redirect(url_for('home'))  
@@ -47,7 +47,7 @@ def save():
 def delete():
     try:
         id=request.form.get("id")
-        ToDoDB.deleteTask(id=id)
+        ToDoDB.deleteTask(id)
     
     except Exception as e:
         flash(str(e))
