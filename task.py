@@ -8,41 +8,41 @@ class Task:
         self.__done=done
         self.__user_id=user_id
     @property
-    def id(self):
+    def id(self)->int:
         return self.__id
     @property
-    def text(self):
+    def text(self)->str:
         return self.__text
     @property
-    def done(self):
+    def done(self)->bool:
         return self.__done
     @property
-    def reminderDatetime(self):
+    def reminderDatetime(self)->datetime:
         return self.__reminderDatetime
     @property
-    def reminded(self):
+    def reminded(self)->bool:
         return self.__reminded
     @property
-    def user_id(self):
+    def user_id(self)->int:
         return self.__user_id
    
     @done.setter
-    def done(self,done):
+    def done(self,done:bool):
         self.__done=done
     @text.setter
-    def text(self,text):
+    def text(self,text:str):
         self.__text=text
     @id.setter
-    def id(self,id):
+    def id(self,id:int):
         self.__id=id
     @reminderDatetime.setter
-    def reminderDatetime(self,reminderDatetime):
+    def reminderDatetime(self,reminderDatetime:datetime):
         self.__reminderDatetime=reminderDatetime
     @reminded.setter
-    def reminded(self,reminded):
+    def reminded(self,reminded:bool):
         self.__reminded=reminded
     @user_id.setter
-    def user_id(self,user_id):
+    def user_id(self,user_id:int):
         self.__user_id=user_id
  
     

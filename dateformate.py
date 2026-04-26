@@ -6,7 +6,7 @@ def isHtmlFormat(datetimeStr):
     except ValueError:
         return False
 
-def isSqliteFormat(datetimeStr):
+def isSqlFormat(datetimeStr):
     try:
         datetime.strptime(datetimeStr,"%Y-%m-%d %H:%M:%S")
         return True

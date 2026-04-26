@@ -1,11 +1,11 @@
 from flask import Flask, flash, render_template, redirect, url_for, session,request
 from login import login_bp  
-from database import ToDoDB
+from database import ToDoDB,Users
 from task import Task
 from datetime import datetime
 import workerMain
 from dotenv import load_dotenv
-from dateformate import isHtmlFormat,isSqliteFormat
+from dateformate import isHtmlFormat,isSqlFormat
 import os
 load_dotenv()
 
@@ -20,29 +20,23 @@ def home():
     if not session.get('loggedin'):
         return redirect(url_for('login.login'))
     taskList=ToDoDB.readToDoDB(session.get('username'))
-   # now_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-    return render_template('index.html',tasks=taskList)#,mindatetime=now_str,tasks=taskList)
+    now_str = datetime.now().strftime("%Y-%m-%dT%H:%M")
+    return render_template('index.html',mindatetime=now_str,tasks=taskList)
 
 @app.route("/add",methods=['POST'])
 def add():
     try:
-        ToDoDB.addTask(Task(text="",username=session.get('username')))
+        ToDoDB.addTask("",username=session.get('username'))
     except Exception as e:
         flash(str(e))
         return redirect(url_for('home')) 
     else:
         return redirect(url_for('home')) 
 
-@app.route("/save",methods=['POST'])
+@app.route("/save",methods=['POST','GET'])
 def save():
     try:
-        remainderDateTime=request.form.get("datetime")
-        if remainderDateTime:
-            if not (isSqliteFormat(remainderDateTime)):
-               remainderDateTime=remainderDateTime.replace("T"," ")+":00"
-        
-        ToDoDB.updateTask(Task(id=request.form.get("id"), text=request.form.get("text").replace("T", " "),done=(1 if request.form.get("done") else 0) ,reminderDatetime=remainderDateTime,username=session.get('username')))
-    
+        ToDoDB.updateTask(Task(id=request.form.get("id"), text=request.form.get("text"),done=bool(request.form.get("done")) ,reminderDatetime=request.form.get("reminderDatetime"),user_id=Users.getUserId(session.get('username'))))
     except Exception as e:
         flash(str(e))
         return redirect(url_for('home'))  
