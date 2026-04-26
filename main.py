@@ -1,6 +1,6 @@
 from flask import Flask, flash, render_template, redirect, url_for, session,request
 from login import login_bp  
-from database import ToDoDB,Users
+from database import ToDoDB
 from task import Task
 from datetime import datetime
 import workerMain
@@ -26,17 +26,17 @@ def home():
 @app.route("/add",methods=['POST'])
 def add():
     try:
-        ToDoDB.addTask("",username=session.get('username'))
+        ToDoDB.addTask(username=session.get('username'))
     except Exception as e:
         flash(str(e))
         return redirect(url_for('home')) 
     else:
         return redirect(url_for('home')) 
 
-@app.route("/save",methods=['POST','GET'])
+@app.route("/save",methods=['POST'])
 def save():
     try:
-        ToDoDB.updateTask(Task(id=request.form.get("id"), text=request.form.get("text"),done=bool(request.form.get("done")) ,reminderDatetime=request.form.get("reminderDatetime"),user_id=Users.getUserId(session.get('username'))))
+        ToDoDB.updateTask(id=request.form.get("id"), text=request.form.get("text"),done=bool(request.form.get("done")) ,reminderDatetime=request.form.get("reminderDatetime")  or None)
     except Exception as e:
         flash(str(e))
         return redirect(url_for('home'))  
@@ -47,7 +47,7 @@ def save():
 def delete():
     try:
         id=request.form.get("id")
-        ToDoDB.deleteTask(Task(id=id))
+        ToDoDB.deleteTask(id=id)
     
     except Exception as e:
         flash(str(e))

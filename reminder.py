@@ -13,7 +13,7 @@ def reminder():
                 if (curr_time<=task.reminderDatetime) and (not task.done) and (not task.reminded):
                     reminderTimeStr=(task.reminderDatetime).strftime("%d/%m/%Y %I:%M %p")
                     sendBot(f"{task.text} your time is up {reminderTimeStr}")
-                    ToDoDB.toggleReminded(task)
+                    ToDoDB.toggleReminded(task.id)
         sleep(1)
 
 

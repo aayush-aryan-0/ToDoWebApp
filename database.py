@@ -30,7 +30,7 @@ class Connection:
         cur.execute('''
             CREATE TABLE IF NOT EXISTS todo (
                 id SERIAL PRIMARY KEY ,
-                task_text TEXT,
+                task_text TEXT DEFAULT '',
                 reminderDatetime TIMESTAMP DEFAULT NULL,
                 done BOOLEAN NOT NULL DEFAULT FALSE,
                 reminded BOOLEAN NOT NULL DEFAULT FALSE,
@@ -47,15 +47,13 @@ class ToDoDB:
     
 
     @staticmethod
-    def addTask(task:str,username:str)->None:
+    def addTask(username:str)->None:
         
         with Connection.connect() as conn:
             cur=conn.cursor()
-            cur.execute("SELECT id FROM users where username=%s",(username,))
-            user_id=cur.fetchone()[0]
             cur.execute(
-                "INSERT INTO todo(task_text,user_id) VALUES(%s,%s) RETURNING id", 
-                (task,user_id)
+                "INSERT INTO todo(user_id) VALUES(%s) RETURNING id", 
+                (Users.getUserId(username),)
             )
             if cur.fetchone() is None:
                 raise TaskNotFound(f"Something went wrong cannot add Task")
@@ -70,34 +68,34 @@ class ToDoDB:
                 raise TaskNotFound(f"Task {id} not found.")
 
     @staticmethod
-    def toggleDone(task: Task)->None:
+    def toggleDone(id:int)->None:
         with Connection.connect()  as conn:
             cur=conn.cursor()
-            cur.execute("UPDATE todo SET done = NOT done WHERE id = %s RETURNING id", (task.id,))
+            cur.execute("UPDATE todo SET done = NOT done WHERE id = %s RETURNING id", (id,))
             if cur.fetchone() is None:
-                raise TaskNotFound(f"Task ID {task.id} not found.")
+                raise TaskNotFound(f"Task ID {id} not found.")
 
     @staticmethod
-    def updateTask(task: Task)->None:
+    def updateTask(id:int, text:str,done:bool,reminderDatetime:datetime)->None:
         with Connection.connect()  as conn:
             cur=conn.cursor()
             cur.execute(
-                    "UPDATE todo SET task_text  = %s, reminderDatetime = %s , done = %s WHERE id = %s RETURNING id",
-                    (task.text,task.reminderDatetime, task.done, task.id))
+                    "UPDATE todo SET task_text  = COALESCE(%s,task_text), reminderDatetime = COALESCE(%s, reminderDatetime) , done = %s WHERE id = %s RETURNING id",
+                    (text,reminderDatetime,done,id))
             
             if cur.fetchone() is None:
-                raise TaskNotFound(f"Task {task.text} not found.")
+                raise TaskNotFound(f"Task {text} not found.")
 
     @staticmethod
-    def toggleReminded(task: Task)->None:
+    def toggleReminded(id:int)->None:
         with Connection.connect()  as conn:
             cur=conn.cursor()
             cur.execute(
                 "UPDATE todo SET reminded = NOT reminded WHERE id = %s RETURNING id",
-                (task.id,)
+                (id,)
             )
             if cur.fetchone() is None:
-                raise TaskNotFound(f"Task {task.text} not found.")
+                raise TaskNotFound(f"Task id {id} not found.")
     
 
     @staticmethod
@@ -105,9 +103,7 @@ class ToDoDB:
         tasks = []
         with Connection.connect()  as conn:
             cur=conn.cursor()
-            cur.execute("SELECT id FROM users where username=%s",(username,))
-            user_id=cur.fetchone()[0]
-            cur.execute("SELECT * FROM todo where user_id =%s",(user_id,))
+            cur.execute("SELECT * FROM todo where user_id =%s",(Users.getUserId(username),))
             for row in cur.fetchall():
                 if row[2]:
                     reminderDateTime=row[2].strftime("%Y-%m-%dT%H:%M")
@@ -130,11 +126,11 @@ class ToDoDB:
 class Users:
 
     @staticmethod
-    def getUserId(username:str):
+    def getUserId(username:str)->int:
         with Connection.connect() as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT id FROM users where username=%s",(username,))
-                user_id=cur.fetchone()[0]
+                user_id:int=cur.fetchone()[0]
                 return user_id
      
     @staticmethod
