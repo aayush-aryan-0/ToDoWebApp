@@ -1,38 +1,36 @@
-from sqlite3 import connect,Connection
-import os
 from errors import *
 from task import Task
 from datetime import datetime
 from argon2 import PasswordHasher
 from dateformate import isHtmlFormat,isSqliteFormat
+import psycopg2
 
 class ToDoDB:
     
     @staticmethod
-    def __connect()->Connection:
-        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-       
-        resources_dir = os.path.join(BASE_DIR, "resources")
-        if not os.path.exists(resources_dir):
-            os.makedirs(resources_dir)
-            
-        DB_PATH = os.path.join(resources_dir, "todo.db")
-        
-        conn = sqlite3.connect(DB_PATH)
-      
-        conn.row_factory = sqlite3.Row 
-        conn.execute("PRAGMA foreign_keys = ON")
-        conn.execute('''
+    def __connect()->psycopg2.extensions.connection:
+        conn = psycopg2.connect(
+            dbname="postgres",
+            user="postgres",
+            password="kiit",
+            host="localhost",
+            port="5432"
+        )
+        cur = conn.cursor()
+
+        cur.execute('''
             CREATE TABLE IF NOT EXISTS todo (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY ,
                 task_text TEXT,
-                reminderDatetime TEXT DEFAULT (datetime('now', 'localtime')),
-                done INTEGER NOT NULL DEFAULT 0,
-                reminded INTEGER NOT NULL DEFAULT 0,
-                username TEXT NOT NULL,
-                FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
+                reminderDatetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                done BOOLEAN NOT NULL DEFAULT FALSE,
+                reminded BOOLEAN NOT NULL DEFAULT FALSE,
+                user_id INTEGER NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             )
         ''')
+        cur.commit()
+        cur.close()
         return conn
 
     @staticmethod
@@ -41,51 +39,50 @@ class ToDoDB:
             raise TypeError("task must be an object of class Task")
         
         with ToDoDB.__connect() as conn:
-            cursor = conn.execute(
-                "INSERT INTO todo(task_text,username) VALUES(?,?)", 
-                (task.text,task.username)
+            cur=conn.cursor()
+            cur.execute(
+                "INSERT INTO todo(task_text,user_id) VALUES(%s,%s) RETURNING id", 
+                (task.text,task.user_id)
             )
            
-            task.id = cursor.lastrowid
+            task.id = cur.fetchone()[0]
 
     @staticmethod
     def deleteTask(task: Task)->None:
         with ToDoDB.__connect() as conn:
-            cursor = conn.execute("DELETE FROM todo WHERE id = ?", (task.id,))
-            if cursor.rowcount == 0:
+            cur=conn.cursor()
+            cur.execute("DELETE FROM todo WHERE id = %s RETURNING id", (task.id,))
+            if cur.fetchone() is None:
                 raise TaskNotFound(f"Task {task.id} not found.")
 
     @staticmethod
     def toggleDone(task: Task)->None:
         with ToDoDB.__connect() as conn:
-            cursor = conn.execute("UPDATE todo SET done = 1 - done WHERE id = ?", (task.id,))
-            if cursor.rowcount == 0:
+            cur=conn.cursor()
+            cur.execute("UPDATE todo SET done = NOT done WHERE id = %s RETURNING id", (task.id,))
+            if cur.fetchone() is None:
                 raise TaskNotFound(f"Task ID {task.id} not found.")
 
     @staticmethod
     def updateTask(task: Task)->None:
         with ToDoDB.__connect() as conn:
-            if task.reminderDatetime:
-                cursor = conn.execute(
-                    "UPDATE todo SET task_text  = ?, reminderDatetime=? , done = ? WHERE id = ?",
-                    (task.text,task.reminderDatetime, task.done, task.id)
-                )
-            else:
-                cursor = conn.execute(
-                    "UPDATE todo SET task_text  = ? , done = ? WHERE id = ?",
-                    (task.text, task.done, task.id)
-                )
-            if cursor.rowcount == 0:
+            cur=conn.cursor()
+            cur.execute(
+                    "UPDATE todo SET task_text  = %s, reminderDatetime = COALESCE(%s, reminderDatetime) , done = %s WHERE id = %s RETURNING id",
+                    (task.text,task.reminderDatetime, task.done, task.id))
+            
+            if cur.fetchone() is None:
                 raise TaskNotFound(f"Task {task.text} not found.")
 
     @staticmethod
     def toggleReminded(task: Task)->None:
         with ToDoDB.__connect() as conn:
-            cursor = conn.execute(
-                "UPDATE todo SET reminded = 1-reminded WHERE id = ?",
+            cur=conn.cursor()
+            cur.execute(
+                "UPDATE todo SET reminded = NOT reminded WHERE id = %s RETURNING id",
                 (task.id,)
             )
-            if cursor.rowcount == 0:
+            if cur.fetchone() is None:
                 raise TaskNotFound(f"Task {task.text} not found.")
     
 
@@ -93,94 +90,106 @@ class ToDoDB:
     def readToDoDB(username:str)->list:
         tasks = []
         with ToDoDB.__connect() as conn:
-            cursor = conn.execute("SELECT * FROM todo where username =?",(username,))
-            for row in cursor.fetchall():
-                reminderDateTime=row['reminderDatetime']
-                if not (isHtmlFormat(reminderDateTime)):
-                    reminderDateTime=reminderDateTime.replace(" ","T")[:-3]
-                tasks.append(Task(id=row['id'],text=row['task_text'], reminderDatetime=reminderDateTime,done=bool(row['done']),reminded=bool(row['reminded'])))
+            cur=conn.cursor()
+            cur.execute("SELECT * FROM todo where username =%s",(username,))
+            for row in cur.fetchall():
+                reminderDateTime=row[2].strftime("%Y-%m-%dT%H:%M")
+                tasks.append(Task(id=row[0],text=row[1], reminderDatetime=reminderDateTime,done=(row[3]),reminded=bool(row[4])))
         return tasks
     @staticmethod
     def readAllToDoDB()->list:
         tasks = []
         with ToDoDB.__connect() as conn:
-            cursor = conn.execute("SELECT * FROM todo ")
-            for row in cursor.fetchall():
-                tasks.append(Task(id=row['id'],text=row['task_text'], reminderDatetime=row['reminderDatetime'],done=bool(row['done']),reminded=bool(row['reminded'])))
+            cur=conn.cursor()
+            cur.execute("SELECT * FROM todo ")
+            for row in cur.fetchall():
+                tasks.append(Task(id=row[0],text=row[1], reminderDatetime=row[2],done=(row[3]),reminded=bool(row[4])))
         return tasks
     
 
 class Users:
      
     @staticmethod
-    def __connect()->Connection:
-        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-       
-        resources_dir = os.path.join(BASE_DIR, "resources")
-        if not os.path.exists(resources_dir):
-            os.makedirs(resources_dir)
-            
-        DB_PATH = os.path.join(resources_dir, "todo.db")
+    def __connect()->psycopg2.extensions.connection:
         
-        connect = sqlite3.connect(DB_PATH)
-      
-        connect.row_factory = sqlite3.Row 
-        
-        connect.execute('''
+        conn = psycopg2.connect(
+            dbname="postgres",
+            user="postgres",
+            password="kiit",
+            host="localhost",
+            port="5432"
+        )
+    
+        cur = conn.cursor()
+        cur.execute('''
             CREATE TABLE IF NOT EXISTS users (
-                username TEXT PRIMARY KEY,
+                id SERIAL PRIMARY KEY ,
+                username TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL,
                 email TEXT NOT NULL
             )
         ''')
-        return connect
+        cur.close()
+        return conn
 
     @staticmethod
     def addUser(username:str,password:str,email:str)->None:
-        try:
+       
             ph=PasswordHasher()
             password=ph.hash(password)
             with Users.__connect() as conn:
-                cursor = conn.execute(
-                    "INSERT INTO users(username, password,email) VALUES(?, ?,?)", 
-                    (username,password,email)
-                )
-        except sqlite3.IntegrityError as e:
-            raise UserAlreadyExists
+                with conn.cursor() as cursor:
+                    try:
+                        cursor.execute(
+                            "INSERT INTO users(username, password,email) VALUES(%s, %s,%s)", 
+                            (username,password,email)
+                        )
+                    except psycopg2.errors.UniqueViolation:
+                        raise UserAlreadyExists
 
 
     @staticmethod
     def deleteUser(username:str)->None:
         with Users.__connect() as conn:
-            cursor = conn.execute("DELETE FROM users WHERE username = ?", (username,))
-            if cursor.rowcount == 0:
-                raise TaskNotFound(f"Task {username} not found.")
+            with conn.cursor() as cursor:
+                cursor.execute("DELETE FROM users WHERE username = %s RETURNING id", (username,))
+                row=cursor.fetchone()
+                Users.checkUserExists(row,username)
 
     @staticmethod
     def changePassword(username:str,password:str)->None:
         ph=PasswordHasher()
         password=ph.hash(password)
         with Users.__connect() as conn:
-            cursor = conn.execute("UPDATE users SET password = ? WHERE username = ?", (password,username))
-            if cursor.rowcount == 0:
-                raise TaskNotFound(f"Task ID {username} not found.")
+            with conn.cursor() as cursor:
+                cursor.execute("UPDATE users SET password = %s WHERE username = %s RETURNING id", (password,username))
+                row=cursor.fetchone()
+                Users.checkUserExists(row,username)
 
     @staticmethod
     def changeEmail(username:str,email:str)->None:
         with Users.__connect() as conn:
-            cursor = conn.execute("UPDATE users SET email = ? WHERE username = ?", (email,username))
-            if cursor.rowcount == 0:
-                raise UserNotFound(f"{username} not found.")
+            with conn.cursor() as cursor:
+                cursor.execute("UPDATE users SET email = %s WHERE username = %s RETURNING id", (email,username))
+                row=cursor.fetchone()
+                Users.checkUserExists(row,username)
+
+                
     
     @staticmethod
     def account(username:str,password:str)->None:
         with Users.__connect() as conn:
-            ph=PasswordHasher()
-            cursor=conn.execute("SELECT password FROM users WHERE username=?",(username,)).fetchone()
-            if not cursor:
-                raise UserNotFound("User Not Found")
-            ph.verify(cursor[0],password)
-            #return cursor
+            with conn.cursor() as cursor:
+                ph=PasswordHasher()
+                cursor.execute("SELECT password FROM users WHERE username=%s",(username,))
+                row=cursor.fetchone()
+                if not row:
+                    raise UserNotFound("User Not Found")
+                ph.verify(row[0],password)
+    @staticmethod
+    def checkUserExists(row:tuple,username:str)->None:
+        if row is None:
+                    raise UserNotFound(f"{username} not found.")
         
 
             
