@@ -24,6 +24,7 @@
 
     </header>
     <main>
+        <span class="status"></span>
         {% with messages = get_flashed_messages() %}
           {% if messages %}
             <ul class="errors">
@@ -34,12 +35,8 @@
           {% endif %}
         {% endwith %}
         
-        {% for task in tasks %}
-
-            {% include "taskBox.html" %}
-
-        {% endfor %}
-        <form class="mainBox" action="/add" method="POST">
+       
+        <form class="mainBox" id="addForm" action="/add" method="POST">
         
             <button id="addBt" type="submit">Add</button>
         
@@ -53,6 +50,8 @@
         made by: Aayush Aryan<br>
         Contact Me:<a href="mailto:aayushar1601@gmail.com">aayushar1601@gmail.com</a>
     </footer>
+
+    <script type="module" src="{{ url_for('static', filename='js/home.js') }}"></script>
     
 </body>
 </html>

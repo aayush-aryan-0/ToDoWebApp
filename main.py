@@ -20,28 +20,28 @@ def home():
     if not session.get('loggedin'):
         return redirect(url_for('login.login'))
     taskList=ToDoDB.readToDoDB(session.get('username'))
-    now_str = datetime.now().strftime("%Y-%m-%dT%H:%M")
-    return render_template('index.html',mindatetime=now_str,tasks=taskList)
+   
+    return render_template('index.html',tasks=taskList)
 
 @app.route("/add",methods=['POST'])
 def add():
     try:
-        ToDoDB.addTask(session.get('username'))
+        newTask=ToDoDB.addTask(session.get('username'))
     except Exception as e:
-        flash(str(e))
-        return redirect(url_for('home')) 
+        return str(e),400
     else:
-        return redirect(url_for('home')) 
+        now_str = datetime.now().strftime("%Y-%m-%dT%H:%M")
+        return render_template('taskBox.html',task=newTask,mindatetime=now_str)
 
 @app.route("/save",methods=['POST'])
 def save():
     try:
         ToDoDB.updateTask(id=request.form.get("id"), text=request.form.get("text"),done=bool(request.form.get("done")) ,reminderDatetime=(request.form.get("reminderDatetime") or None))
     except Exception as e:
-        flash(str(e))
-        return redirect(url_for('home'))  
+        
+        return str(e),400
     else:
-        return redirect(url_for('home'))  
+        return "OK"  
     
 @app.route("/delete",methods=['POST'])
 def delete():
@@ -50,10 +50,10 @@ def delete():
         ToDoDB.deleteTask(id)
     
     except Exception as e:
-        flash(str(e))
-        return redirect(url_for('home')) 
+       
+        return str(e),400
     else:
-        return redirect(url_for('home')) 
+        return "OK"
 
 
 

@@ -47,7 +47,7 @@ class ToDoDB:
     
 
     @staticmethod
-    def addTask(username:str)->None:
+    def addTask(username:str)->Task:
         
         with Connection.connect() as conn:
             cur=conn.cursor()
@@ -55,8 +55,13 @@ class ToDoDB:
                 "INSERT INTO todo(user_id) VALUES(%s) RETURNING id", 
                 (Users.getUserId(username),)
             )
-            if cur.fetchone() is None:
+            id=cur.fetchone()[0]
+            if id is None:
                 raise TaskNotFound(f"Something went wrong cannot add Task")
+            
+            cur.execute("SELECT*FROM todo where id=%s",(id,))
+            row=cur.fetchone()
+            return (Task(id=row[0],text=row[1], reminderDatetime=row[2],done=(row[3]),reminded=(row[4]),user_id=row[5]))
            
 
     @staticmethod
@@ -109,7 +114,7 @@ class ToDoDB:
                     reminderDateTime=row[2].strftime("%Y-%m-%dT%H:%M")
                 else:
                     reminderDateTime=None
-                tasks.append(Task(id=row[0],text=row[1], reminderDatetime=reminderDateTime,done=(row[3]),reminded=bool(row[4])))
+                tasks.append(Task(id=row[0],text=row[1], reminderDatetime=reminderDateTime,done=(row[3]),reminded=(row[4])))
         return tasks
     
     @staticmethod
@@ -119,7 +124,7 @@ class ToDoDB:
             cur=conn.cursor()
             cur.execute("SELECT * FROM todo ")
             for row in cur.fetchall():
-                tasks.append(Task(id=row[0],text=row[1], reminderDatetime=row[2],done=(row[3]),reminded=bool(row[4])))
+                tasks.append(Task(id=row[0],text=row[1], reminderDatetime=row[2],done=(row[3]),reminded=(row[4])))
         return tasks
     
 

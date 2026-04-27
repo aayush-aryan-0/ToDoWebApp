@@ -7,10 +7,10 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styleTask.css') }}">
 </head>
 <body>
-  <section  >
+  <section  class="taskBox" >
     <div  >
         
-        <form action="/save" method="POST">
+        <form class="saveForm" action="/save" method="POST">
           <input type="hidden" name="id" value="{{ task.id }}">
           <input type="hidden" name="user_id" value="{{ task.user_id }}">
           
@@ -21,12 +21,15 @@
           <button type="submit" id="saveBt">SAVE</button>
         </form>
         
-        <form action="/delete" method="POST">
+        <form class="deleteForm" action="/delete" method="POST">
             <input type="hidden" name="id" value="{{ task.id }}">
             <button type="submit" id="deleteBt">DELETE</button>
         </form>
        
     </div>
   </section>
+
+
+  <script src="{{ url_for('static', filename='js/home.js') }}"></script>
 </body>
 </html>
